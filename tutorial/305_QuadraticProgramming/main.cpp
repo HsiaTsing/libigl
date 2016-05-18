@@ -8,7 +8,7 @@
 #include <igl/viewer/Viewer.h>
 #include <Eigen/Sparse>
 #include <iostream>
-
+#include "tutorial_shared_path.h"
   
 Eigen::VectorXi b;
 Eigen::VectorXd B,bc,lx,ux,Beq,Bieq,Z;
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
   using namespace std;
   MatrixXd V;
   MatrixXi F;
-  igl::readOFF("../shared/cheburashka.off",V,F);
+  igl::readOFF(TUTORIAL_SHARED_PATH "/cheburashka.off",V,F);
 
   // Plot the mesh
   igl::viewer::Viewer viewer;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
   // Equality constraint constrain solution to sum to 1
   Beq.resize(1,1);
   Beq(0) = 0.08;
-  Aeq = M.diagonal().transpose().sparseView();
+  Aeq = M.diagonal().sparseView().transpose();
   // (Empty inequality constraints)
   solve(viewer);
   cout<<

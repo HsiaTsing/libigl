@@ -8,6 +8,8 @@
 #include "readOBJ.h"
 
 #include "list_to_matrix.h"
+#include "max_size.h"
+#include "min_size.h"
 
 #include <iostream>
 #include <cstdio>
@@ -120,6 +122,18 @@ IGL_INLINE bool igl::readOBJ(
         TC.push_back(tex);
       }else if(type == f)
       {
+        const auto & shift = [&V](const int i)->int
+        {
+          return i<0 ? i+V.size() : i-1;
+        };
+        const auto & shift_t = [&TC](const int i)->int
+        {
+          return i<0 ? i+TC.size() : i-1;
+        };
+        const auto & shift_n = [&N](const int i)->int
+        {
+          return i<0 ? i+N.size() : i-1;
+        };
         std::vector<Index > f;
         std::vector<Index > ftc;
         std::vector<Index > fn;
@@ -131,23 +145,23 @@ IGL_INLINE bool igl::readOBJ(
           // adjust offset
           l += offset;
           // Process word
-          unsigned int i,it,in;
-          if(sscanf(word,"%u/%u/%u",&i,&it,&in) == 3)
+          long int i,it,in;
+          if(sscanf(word,"%ld/%ld/%ld",&i,&it,&in) == 3)
           {
-            f.push_back(i-1);
-            ftc.push_back(it-1);
-            fn.push_back(in-1);
-          }else if(sscanf(word,"%u/%u",&i,&it) == 2)
+            f.push_back(shift(i));
+            ftc.push_back(shift_t(it));
+            fn.push_back(shift_n(in));
+          }else if(sscanf(word,"%ld/%ld",&i,&it) == 2)
           {
-            f.push_back(i-1);
-            ftc.push_back(it-1);
-          }else if(sscanf(word,"%u//%u",&i,&in) == 2)
+            f.push_back(shift(i));
+            ftc.push_back(shift_t(it));
+          }else if(sscanf(word,"%ld//%ld",&i,&in) == 2)
           {
-            f.push_back(i-1);
-            fn.push_back(in-1);
-          }else if(sscanf(word,"%u",&i) == 1)
+            f.push_back(shift(i));
+            fn.push_back(shift_n(in));
+          }else if(sscanf(word,"%ld",&i) == 1)
           {
-            f.push_back(i-1);
+            f.push_back(shift(i));
           }else
           {
             fprintf(stderr,
@@ -235,15 +249,16 @@ IGL_INLINE bool igl::readOBJ(
     return false;
   }
   bool V_rect = igl::list_to_matrix(vV,V);
+  const char * format = "Failed to cast %s to matrix: min (%d) != max (%d)\n";
   if(!V_rect)
   {
-    // igl::list_to_matrix(vV,V) already printed error message to std err
+    printf(format,"V",igl::min_size(vV),igl::max_size(vV));
     return false;
   }
   bool F_rect = igl::list_to_matrix(vF,F);
   if(!F_rect)
   {
-    // igl::list_to_matrix(vF,F) already printed error message to std err
+    printf(format,"F",igl::min_size(vF),igl::max_size(vF));
     return false;
   }
   if(!vN.empty())
@@ -251,7 +266,7 @@ IGL_INLINE bool igl::readOBJ(
     bool VN_rect = igl::list_to_matrix(vN,CN);
     if(!VN_rect)
     {
-      // igl::list_to_matrix(vV,V) already printed error message to std err
+      printf(format,"CN",igl::min_size(vN),igl::max_size(vN));
       return false;
     }
   }
@@ -261,7 +276,7 @@ IGL_INLINE bool igl::readOBJ(
     bool FN_rect = igl::list_to_matrix(vFN,FN);
     if(!FN_rect)
     {
-      // igl::list_to_matrix(vV,V) already printed error message to std err
+      printf(format,"FN",igl::min_size(vFN),igl::max_size(vFN));
       return false;
     }
   }
@@ -272,7 +287,7 @@ IGL_INLINE bool igl::readOBJ(
     bool T_rect = igl::list_to_matrix(vTC,TC);
     if(!T_rect)
     {
-      // igl::list_to_matrix(vTC,T) already printed error message to std err
+      printf(format,"TC",igl::min_size(vTC),igl::max_size(vTC));
       return false;
     }
   }
@@ -282,7 +297,7 @@ IGL_INLINE bool igl::readOBJ(
     bool FTC_rect = igl::list_to_matrix(vFTC,FTC);
     if(!FTC_rect)
     {
-      // igl::list_to_matrix(vF,F) already printed error message to std err
+      printf(format,"FTC",igl::min_size(vFTC),igl::max_size(vFTC));
       return false;
     }
   }

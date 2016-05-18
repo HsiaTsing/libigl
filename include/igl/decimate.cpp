@@ -9,6 +9,7 @@
 #include "collapse_edge.h"
 #include "edge_flaps.h"
 #include "remove_unreferenced.h"
+#include "max_faces_stopping_condition.h"
 #include <iostream>
 
 IGL_INLINE bool igl::decimate(
@@ -18,28 +19,7 @@ IGL_INLINE bool igl::decimate(
   Eigen::MatrixXd & U,
   Eigen::MatrixXi & G)
 {
-  const auto & max_m_faces = 
-    [&max_m,&F](
-    const Eigen::MatrixXd &,
-    const Eigen::MatrixXi &,
-    const Eigen::MatrixXi &,
-    const Eigen::VectorXi &,
-    const Eigen::MatrixXi &,
-    const Eigen::MatrixXi &,
-    const std::set<std::pair<double,int> > &,
-    const std::vector<std::set<std::pair<double,int> >::iterator > &,
-    const Eigen::MatrixXd &,
-    const int,
-    const int,
-    const int,
-    const int,
-    const int)->bool
-    {
-      using namespace std;
-      static int m = F.rows();
-      m-=2;
-      return m<=(int)max_m;
-    };
+  int m = F.rows();
   const auto & shortest_edge_and_midpoint = [](
     const int e,
     const Eigen::MatrixXd & V,
@@ -54,7 +34,13 @@ IGL_INLINE bool igl::decimate(
     cost = (V.row(E(e,0))-V.row(E(e,1))).norm();
     p = 0.5*(V.row(E(e,0))+V.row(E(e,1)));
   };
-  return decimate(V,F,shortest_edge_and_midpoint,max_m_faces,U,G);
+  return decimate(
+    V,
+    F,
+    shortest_edge_and_midpoint,
+    max_faces_stopping_condition(m,max_m),
+    U,
+    G);
 }
 
 IGL_INLINE bool igl::decimate(

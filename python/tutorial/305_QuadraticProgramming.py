@@ -2,7 +2,7 @@
 import sys, os
 sys.path.insert(0, os.getcwd() + "/../")
 
-import igl
+import pyigl as igl
 
 b = igl.eigen.MatrixXi()
 B = igl.eigen.MatrixXd()
@@ -80,7 +80,7 @@ ux = igl.eigen.MatrixXd.Ones(V.rows(),1)
 
 # Equality constraint constrain solution to sum to 1
 Beq = igl.eigen.MatrixXd([[0.08]])
-Aeq = M.diagonal().transpose().sparseView()
+Aeq = M.diagonal().sparseView().transpose()
 
 # (Empty inequality constraints)
 solve(viewer)

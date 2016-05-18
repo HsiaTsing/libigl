@@ -1,11 +1,12 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
-#include "python.h"
+#include "python_shared.h"
 #define ENABLE_SERIALIZATION
 #include <igl/viewer/Viewer.h>
 #include <igl/viewer/ViewerCore.h>
 #include <igl/viewer/ViewerData.h>
+#include <igl/serialize.h>
 
 void python_export_igl_viewer(py::module &m)
 {
@@ -145,7 +146,6 @@ py::class_<igl::viewer::ViewerCore> viewercore_class(me, "ViewerCore");
     .def("draw",&igl::viewer::ViewerCore::draw)
     .def("draw_buffer",&igl::viewer::ViewerCore::draw_buffer)
 
-    .def_readwrite("textrenderer",&igl::viewer::ViewerCore::textrenderer)
     .def_readwrite("shininess",&igl::viewer::ViewerCore::shininess)
 
     .def_property("background_color",

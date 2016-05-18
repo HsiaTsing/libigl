@@ -59,6 +59,7 @@ namespace igl
         const WindingNumberTree<Point> & parent,
         const Eigen::MatrixXi & F);
       inline virtual ~WindingNumberTree();
+      inline void delete_children();
       inline virtual void set_mesh(
         const Eigen::MatrixXd & V,
         const Eigen::MatrixXi & F);
@@ -207,6 +208,12 @@ inline igl::WindingNumberTree<Point>::WindingNumberTree(
 
 template <typename Point>
 inline igl::WindingNumberTree<Point>::~WindingNumberTree()
+{
+  delete_children();
+}
+
+template <typename Point>
+inline void igl::WindingNumberTree<Point>::delete_children()
 {
   using namespace std;
   // Delete children
@@ -427,7 +434,8 @@ inline double igl::WindingNumberTree<Point>::cached_winding_number(
   const Point & p) const
 {
   using namespace std;
-  // Simple metric for "far".
+  // Simple metric for `is_far`
+  //
   //   this             that
   //                   --------
   //   -----          /   |    \ .
@@ -443,17 +451,17 @@ inline double igl::WindingNumberTree<Point>::cached_winding_number(
   // a = atan2(R-r,d), where d is the distance between centers
 
   // That should be bigger (what about parent? what about sister?)
-  bool far = this->radius<that.radius;
-  if(far)
+  bool is_far = this->radius<that.radius;
+  if(is_far)
   {
     double a = atan2(
       that.radius - this->radius,
       (that.center - this->center).norm());
     assert(a>0);
-    far = (a<PI/8.0);
+    is_far = (a<PI/8.0);
   }
 
-  if(far)
+  if(is_far)
   {
     // Not implemented yet
     pair<const WindingNumberTree*,const WindingNumberTree*> this_that(this,&that);
